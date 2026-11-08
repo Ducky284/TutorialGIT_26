@@ -1,0 +1,199 @@
+package org.firstinspires.ftc.robotcontroller;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+//import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+@Autonomous(name = "firstjavatest")
+public class firstjavatest extends LinearOpMode {
+    // ---------------- HARDWARE ----------------
+    private DcMotor leftDrive = null;
+    private DcMotor rightDrive = null;
+    //private DcMotor shooter = null;
+    //private CRServo feedLeft = null;
+    //private CRServo feedRight = null;
+
+    // ---------------- ENCODER CONSTANTS (TUNE) ----------------
+    static final double COUNTS_PER_MOTOR_REV = 312.0; // TODO set for your motor/encoder
+    static final double DRIVE_GEAR_REDUCTION = 1.0;  // TODO 1.0 if direct
+    static final double WHEEL_DIAMETER_INCHES = 4.0; // TODO set your wheel
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * Math.PI);
+
+    // Track width (wheel center-to-center) for turning
+    static final double TRACK_WIDTH_INCHES = 13.5;   // TODO measure + tune
+
+    // ---------------- AUTO MOVEMENT (TUNE) ----------------
+    static final double DRIVE_SPEED = 0.2;
+    //static final double TURN_SPEED = 0.05;
+    //static final double DRIVE_TO_SHOOT_LINE_INCHES = 24.0; // TODO measure on field
+    //static final double BLUE_TURN_DEG = 5.0;        // TODO tune to face BLUE goal triangle
+    //static final double FINAL_ADJUST_INCHES = 0.05;  // optional small nudge (0 = off)
+    //static final double FINAL_ADJUST_SPEED = 0.15;
+
+    // ---------------- SHOOTING (TUNE) ----------------
+    static final double SHOOTER_POWER = 0.55;
+    static final int NUM_BALLS_TO_SHOOT = 3;
+    static final long SHOOTER_SPINUP_MS = 1900;     // TODO tune (start 1500-3000)
+    static final long FEED_TIME_MS = 400;           // TODO tune for 1 ball
+    static final long RELOAD_TIME_MS = 2000;         // TODO tune pause between balls
+    static final double FEED_LEFT_POWER = 1.0;       // TODO flip sign if needed
+    static final double FEED_RIGHT_POWER = -1.0;     // TODO flip sign if needed
+
+    @Override
+    public void runOpMode() {
+        // Hardware names must match RC config
+        leftDrive = hardwareMap.get(DcMotor.class, "BottomLeftDCMotor");
+        rightDrive = hardwareMap.get(DcMotor.class, "BottomRightDCMotor");
+        //shooter = hardwareMap.get(DcMotor.class, "TopRightDCMotor");
+        //feedLeft = hardwareMap.get(CRServo.class, "Leftservo");
+        //feedRight = hardwareMap.get(CRServo.class, "Rightservo");
+
+        // Directions (adjust if robot drives backward)
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        //shooter.setDirection(DcMotor.Direction.REVERSE);
+
+        // Brake to stop/hold better
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Encoders
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        telemetry.addLine("Auto ready: drive forward 24 inches");
+        telemetry.addData("Target distance", "24 inches");
+        telemetry.update();
+
+        waitForStart();
+        if (!opModeIsActive()) return;
+
+        // 1) Drive to shooting line/spot
+        //driveStraight(DRIVE_SPEED, DRIVE_TO_SHOOT_LINE_INCHES, 5.0);
+
+        // 1) Drive forward 24 inches
+        driveStraight(DRIVE_SPEED, 24.0, 5.0);
+
+// 2) Stop the robot
+        stopAll();
+
+        //while (opModeIsActive()) {
+            //idle();
+        }
+
+    private void stopAll() {
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+    }
+
+    // ---------------- DRIVE/TURN ----------------
+    private void driveStraight(double speed, double inches, double timeoutS) {
+        driveTankInches(speed, inches, inches, timeoutS);
+    }
+
+    private void driveTankInches(double speed, double leftInches, double rightInches, double timeoutS) {
+        int newLeftTarget = leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+        int newRightTarget = rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+        leftDrive.setTargetPosition(newLeftTarget);
+        rightDrive.setTargetPosition(newRightTarget);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //speed = Math.abs(speed);
+        //leftDrive.setPower(speed);
+        //rightDrive.setPower(speed);
+
+        //ElapsedTime runtime = new ElapsedTime();
+        //runtime.reset();
+
+        //while (opModeIsActive() && runtime.seconds() < timeoutS && (leftDrive.isBusy() || rightDrive.isBusy())) {
+            //telemetry.addData("leftInches , rightInches ", "L1:%s R1:%s", leftInches, rightInches);
+            //telemetry.addData("Targets", "L:%d R:%d", newLeftTarget, newRightTarget);
+            //telemetry.addData("Distance", "%f", DRIVE_TO_SHOOT_LINE_INCHES);
+            //telemetry.addData("Current", "L:%d R:%d", leftDrive.getCurrentPosition(), rightDrive.getCurrentPosition());
+            //telemetry.update();
+        //}
+
+        //leftDrive.setPower(0);
+        //rightDrive.setPower(0);
+
+        //leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    //}
+
+    // ---------------- SHOOTING ----------------
+    //private void shootBalls(int count) {
+       // shooter.setPower(SHOOTER_POWER);
+        //sleep(SHOOTER_SPINUP_MS);
+
+        //for (int i = 0; i < count && opModeIsActive(); i++) {
+            //feedOneBall();
+        //}
+
+        //feedLeft.setPower(0);
+        //feedRight.setPower(0);
+        //shooter.setPower(0);
+    //}
+
+    //private void feedOneBall() {
+        //feedLeft.setPower(FEED_LEFT_POWER);
+        //feedRight.setPower(FEED_RIGHT_POWER);
+        //sleep(FEED_TIME_MS);
+        //feedLeft.setPower(0);
+        //feedRight.setPower(0);
+        //sleep(RELOAD_TIME_MS);
+    //}
+
+    //void stopAll() {
+      //  leftDrive.setPower(0);
+      //  rightDrive.setPower(0);
+        //shooter.setPower(0);
+        //feedLeft.setPower(0);
+        //feedRight.setPower(0);
+    }
+}
+
+    // 2) Turn LEFT to BLUE shooting area
+        //turnLeft(TURN_SPEED, BLUE_TURN_DEG, 1.0);
+
+        // 3) Optional final adjust
+        //if (Math.abs(FINAL_ADJUST_INCHES) > 0.01) {
+            //driveStraight(FINAL_ADJUST_SPEED, FINAL_ADJUST_INCHES, 1.5);
+        //}
+
+        // 4) Shoot
+        //shootBalls(NUM_BALLS_TO_SHOOT);
+
+        // 5) Turn Left again
+        //turnLeft(TURN_SPEED, BLUE_TURN_DEG, 1.5);
+
+        // 5) Bring it back
+        //driveStraight(DRIVE_SPEED, DRIVE_TO_SHOOT_LINE_INCHES, 1.0);
+
+        // 6) Hold still
+        //stopAll();
+
+        //while (opModeIsActive()) {
+            //idle();
+        //}
+   // }
+
+
+//private void driveback(double speed, double inches, double timeoutS) {
+        //leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        //rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        //driveTankInches(speed, inches, inches, timeoutS);
+    //}
+
+    //private void turnLeft(double speed, double degrees, double timeoutS) {
+        //double turnInches = (TRACK_WIDTH_INCHES * Math.PI) * (Math.abs(degrees) / 360.0);
+        //driveTankInches(speed, +turnInches, -turnInches, timeoutS); // left back, right forward
+    //}
+
